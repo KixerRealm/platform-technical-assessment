@@ -1,0 +1,61 @@
+trigger:
+- main
+
+pr:
+- main
+
+variables:
+  acrServiceConnection: 'acrServiceConnection'
+  aksServiceConnection: 'aksServiceConnection'
+
+  acrName: 'myacrname'                # no .azurecr.io
+  imageRepository: 'demo-nginx'
+  manifestsPath: 'k8s'
+  stagingNamespace: 'staging'
+  productionNamespace: 'production'
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildPush
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - checkout: self
+    - bash: |
+        echo "##vso[task.setvariable variable=tag]$(Build.BuildId)-$(Build.SourceVersionShort)"
+      displayName: Set image tag
+
+    - task: Docker@2
+      displayName: Build & Push
+      inputs:
+        command: buildAndPush
+        containerRegistry: $(acrServiceConnection)
+        repository: $(imageRepository)
+        dockerfile: Dockerfile
+        tags: |
+          $(tag)
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - deployment: DeployAKS
+    pool:
+      vmImage: ubuntu-latest
+    # PR -> staging, main -> production
+    environment: ${{ if eq(variables['Build.Reason'], 'PullRequest') }}staging${{ else }}production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: KubernetesManifest@1
+            displayName: Apply manifests
+            inputs:
+              action: deploy
+              kubernetesServiceConnection: $(aksServiceConnection)
+              namespace: ${{ if eq(variables['Build.Reason'], 'PullRequest') }}$(stagingNamespace)${{ else }}$(productionNamespace)
+              manifests: |
+                $(manifestsPath)/*.yml
+                $(manifestsPath)/*.yaml
+              containers: |
+                $(acrName).azurecr.io/$(imageRepository):$(tag)
