@@ -20,6 +20,13 @@ spec:
           port: 80
   egress:
     - to:
+        - podSelector:
+          matchLabels:
+            app: db
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
         - namespaceSelector: {}
       ports:
         - protocol: UDP
