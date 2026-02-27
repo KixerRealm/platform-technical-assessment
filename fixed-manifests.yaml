@@ -14,15 +14,15 @@ spec:
   template:
     metadata:
       labels:
-        application: web-app
+        app: web-app
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
+        prometheus.io/port: "80"
     spec:
       serviceAccountName: webapp-sa
       containers:
       - name: web
-        image: nginx:latest
+        image: nginx:1.27.0
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -37,19 +37,23 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
-            port: 8080
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /health
-            port: 8080
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 10
-          successThreshold: 3
+          successThreshold: 1
         securityContext:
-          privileged: true
-          runAsUser: 0
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 101
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         env:
         - name: DATABASE_PASSWORD
           valueFrom:
@@ -76,7 +80,7 @@ metadata:
   namespace: production
 type: Opaque
 stringData:
-  database_password: supersecretpassword123
+  database_password: ${DATABASE_PASSWORD}
 ---
 # service.yaml
 apiVersion: v1
@@ -133,7 +137,14 @@ spec:
     ports:
     - protocol: TCP
       port: 80
-  egress: []
+  egress:
+  - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
 ---
 # pdb.yaml
 apiVersion: policy/v1
