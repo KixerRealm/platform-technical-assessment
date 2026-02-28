@@ -66,7 +66,16 @@ spec:
               key: path
         volumeMounts:
         - name: cache
-          mountPath: /var/cache
+          mountPath: /var/cache/nginx
+        - name: run
+          mountPath: /var/run
+        - name: tmp
+          mountPath: /tmp
       volumes:
       - name: cache
         emptyDir: {}
+      - name: run
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+
