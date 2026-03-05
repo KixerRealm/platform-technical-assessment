@@ -4,7 +4,7 @@
 
 ### Issues Found and Fixes Applied
 
-#### Deployment (`Manifests/deployment.yaml`)
+#### Deployment (`manifests/deployment.yaml`)
 
 | # | Issue | Fix |
 |---|-------|-----|
@@ -15,38 +15,38 @@
 | 5 | `DATABASE_PASSWORD` hardcoded as a plain env value | Moved to a `secretKeyRef` pointing to a new `Secret` manifest |
 | 6 | `volumeMount` references `data` but only `cache` is defined in `volumes` | Changed volumeMount name to `cache` |
 
-#### Secret (`Manifests/secret.yaml`)
+#### Secret (`manifests/secret.yaml`)
 
 - Created a new `Secret` resource for `DATABASE_PASSWORD`
 - Uses `${DATABASE_PASSWORD}` placeholder to be substituted by CI/CD at deploy time
 
-#### Service (`Manifests/service.yaml`)
+#### Service (`manifests/service.yaml`)
 
 | # | Issue | Fix |
 |---|-------|-----|
 | 1 | Service namespace is `staging` but all other resources are in `production` — ingress can't route to it | Changed namespace to `production` |
 | 2 | `spec.selector.app` doesn't match deployment pod labels | Changed selector to `app: web-app` |
 
-#### Ingress (`Manifests/ingress.yaml`)
+#### Ingress (`manifests/ingress.yaml`)
 
 | # | Issue | Fix |
 |---|-------|-----|
 | 1 | Missing required `pathType` field | Added `pathType: Prefix` |
 | 2 | Backend points to non-existent service `webapp-svc` | Changed to `web-app-service` |
 
-#### NetworkPolicy (`Manifests/networkpolicy.yaml`)
+#### NetworkPolicy (`manifests/networkpolicy.yaml`)
 
 | # | Issue | Fix |
 |---|-------|-----|
 | 1 | Ingress rule allows port `443` but app runs on HTTP port `80` | Changed to port `80` |
 
-#### PodDisruptionBudget (`Manifests/pdb.yaml`)
+#### PodDisruptionBudget (`manifests/pdb.yaml`)
 
 | # | Issue | Fix |
 |---|-------|-----|
 | 1 | Both `minAvailable: 3` and `maxUnavailable: 1` are set — these contradict each other (3 min available with 3 replicas means 0 can go down, but maxUnavailable says 1 can) | Removed `minAvailable`, kept only `maxUnavailable: 1` |
 
-#### HorizontalPodAutoscaler (`Manifests/hpa.yaml`)
+#### HorizontalPodAutoscaler (`manifests/hpa.yaml`)
 
 | # | Issue | Fix |
 |---|-------|-----|
@@ -64,12 +64,13 @@ Manifests/
 ├── networkpolicy.yaml   # Ingress/egress traffic rules
 ├── pdb.yaml             # Pod disruption budget
 └── hpa.yaml             # Horizontal pod autoscaler
+└── configmap.yaml       # ConfigMap
 ```
 
 ### How to Apply
 
 ```bash
-kubectl apply -f Manifests/
+kubectl apply -f manifests/
 ```
 
 ---
