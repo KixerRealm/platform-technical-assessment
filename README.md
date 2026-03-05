@@ -44,7 +44,7 @@
 
 | # | Issue | Fix |
 |---|-------|-----|
-| 1 | Both `minAvailable: 3` and `maxUnavailable: 1` are set — these contradict each other (3 min available with 3 replicas means 0 can go down, but maxUnavailable says 1 can) | Removed `minAvailable`, kept only `maxUnavailable: 1` |
+| 1 | Both `minAvailable: 3` and `maxUnavailable: 1` are set — these contradict each other (3 min available with 3 replicas means 0 can go down, but maxUnavailable says 1 can) | Removed `minAvailable`, kept only `maxUnavailable: 1` so at most one pod is disrupted at a time |
 
 #### HorizontalPodAutoscaler (`manifests/hpa.yaml`)
 
@@ -63,14 +63,15 @@ Manifests/
 ├── ingress.yaml         # Ingress routing for webapp.example.com
 ├── networkpolicy.yaml   # Ingress/egress traffic rules
 ├── pdb.yaml             # Pod disruption budget
-└── hpa.yaml             # Horizontal pod autoscaler
+├── hpa.yaml             # Horizontal pod autoscaler
 └── configmap.yaml       # ConfigMap
 ```
+TLS can be added under spec.tls
 
 ### How to Apply
 
 ```bash
-kubectl apply -f manifests/
+kubectl apply -k manifests/
 ```
 
 ---

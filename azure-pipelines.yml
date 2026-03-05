@@ -10,7 +10,7 @@ variables:
 
   acrName: 'myacrname'                # no .azurecr.io
   imageRepository: 'demo-nginx'
-  manifestsPath: 'k8s'
+  manifestsPath: 'manifests'
   stagingNamespace: 'staging'
   productionNamespace: 'production'
 
@@ -55,8 +55,8 @@ stages:
               kubernetesServiceConnection: $(aksServiceConnection)
               namespace: ${{ if eq(variables['Build.Reason'], 'PullRequest') }}$(stagingNamespace)${{ else }}$(productionNamespace)
               manifests: |
-                Manifests/*.yml
-                Manifests/*.yaml
+                manifests/*.yml
+                manifests/*.yaml
               containers: |
 
                 $(acrName).azurecr.io/$(imageRepository):$(tag)

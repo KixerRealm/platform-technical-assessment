@@ -4,14 +4,15 @@ metadata:
   name: web-app-ingress
   namespace: production
 spec:
+  ingressClassName: nginx
   rules:
-  - host: webapp.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: web-app-service
-            port:
-              number: 80
+    - host: webapp.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-app-service
+                port:
+                  number: 80
