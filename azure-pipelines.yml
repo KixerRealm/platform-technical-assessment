@@ -55,7 +55,8 @@ stages:
               kubernetesServiceConnection: $(aksServiceConnection)
               namespace: ${{ if eq(variables['Build.Reason'], 'PullRequest') }}$(stagingNamespace)${{ else }}$(productionNamespace)
               manifests: |
-                $(manifestsPath)/*.yml
-                $(manifestsPath)/*.yaml
+                Manifests/*.yml
+                Manifests/*.yaml
               containers: |
+
                 $(acrName).azurecr.io/$(imageRepository):$(tag)
