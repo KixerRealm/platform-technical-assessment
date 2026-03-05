@@ -19,7 +19,6 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
     spec:
-      serviceAccountName: webapp-sa
       containers:
       - name: web
         image: nginx:1.27.0
@@ -78,4 +77,5 @@ spec:
         emptyDir: {}
       - name: tmp
         emptyDir: {}
+
 
